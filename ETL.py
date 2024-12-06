@@ -1,3 +1,4 @@
+import os
 from typing import List
 
 import json
@@ -79,6 +80,7 @@ def parse_users(data):
 
 
 def insert_data(
+        db: Session,
         pharmacies: List[PharmacyCreate],
         pharmacy_hours: List[PharmacyHourCreate],
         masks: list[str],
@@ -86,8 +88,6 @@ def insert_data(
         users: List[UserCreate],
         transactions: List[TransactionCreate]
 ):
-    db: Session = SessionLocal()
-
     try:
 
         for pharmacy in pharmacies:
@@ -139,11 +139,19 @@ def insert_data(
         db.close()
 
 
-if __name__ == "__main__":
-    pharmacy_raw = load_data('data/pharmacies.json')
+def run(db):
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    pharmacies_path = os.path.join(current_dir, 'data/pharmacies.json')
+    pharmacy_raw = load_data(pharmacies_path)
     pharmacies, pharmacy_hours, masks, prices = parse_pharmacies(pharmacy_raw)
 
-    user_raw = load_data('data/users.json')
+    users_path = os.path.join(current_dir, 'data/users.json')
+    user_raw = load_data(users_path)
     users, transactions = parse_users(user_raw)
 
-    insert_data(pharmacies, pharmacy_hours, masks, prices, users, transactions)
+    insert_data(db, pharmacies, pharmacy_hours, masks, prices, users, transactions)
+
+
+if __name__ == "__main__":
+    db: Session = SessionLocal()
+    run(db)

@@ -1,3 +1,4 @@
+from fastapi import Query
 from pydantic import BaseModel
 from typing import List
 from datetime import time, datetime
@@ -32,11 +33,18 @@ class PharmacyCreate(PharmacyBase):
 
 class Pharmacy(PharmacyBase):
     id: int
-    opening_hours: List[PharmacyHour] = []
 
     class Config:
         orm_mode = True
+        from_attributes = True
 
+
+class PharmacyWithHours(Pharmacy):
+    opening_hours: List[PharmacyHour] = []
+
+
+class PharmacyWithCount(Pharmacy):
+    mask_count: int
 
 
 class MaskBase(BaseModel):
@@ -52,6 +60,10 @@ class Mask(MaskBase):
 
     class Config:
         orm_mode = True
+
+
+class MaskWithPrice(Mask):
+    price: float
 
 
 class MaskPriceBase(BaseModel):
@@ -72,6 +84,12 @@ class MaskPrice(MaskPriceBase):
         orm_mode = True
 
 
+class PharmacyOrMask(BaseModel):
+    id: int
+    name: str
+    type: str
+
+
 class TransactionBase(BaseModel):
     transaction_amount: float
     date: datetime
@@ -88,7 +106,15 @@ class Transaction(TransactionBase):
     user_id: int
     pharmacy_id: int
     mask_id: int
-    mask: Mask
+    mask: MaskWithPrice
+
+    class Config:
+        orm_mode = True
+
+
+class TransactionSummary(BaseModel):
+    total_amount: int
+    total_value: float
 
     class Config:
         orm_mode = True
@@ -105,8 +131,34 @@ class UserCreate(UserBase):
 
 class User(UserBase):
     id: int
-    transactions: List[Transaction] = []
 
     class Config:
         orm_mode = True
 
+
+class UserTopCount(BaseModel):
+    id: int
+    name: str
+    total_amount: int
+
+    class Config:
+        orm_mode = True
+
+
+class PurchaseRequest(BaseModel):
+    user_id: int
+    mask_id: int
+    pharmacy_id: int
+    amount: int
+
+
+class DateRange(BaseModel):
+    start_date: datetime
+    end_date: datetime
+
+
+def get_date_range(
+        start_date: datetime = Query(..., example="2021-01-01"),
+        end_date: datetime = Query(..., example="2021-01-31")
+) -> DateRange:
+    return DateRange(start_date=start_date, end_date=end_date)
