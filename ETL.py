@@ -9,7 +9,8 @@ from sqlalchemy.orm import Session
 
 from database import SessionLocal
 from db_models import Pharmacy, Mask, MaskPrice, PharmacyHour, Transaction, User
-from in_out_schema import PharmacyCreate, MaskPriceCreate, PharmacyHourCreate, TransactionCreate, UserCreate
+from schemas.input import PharmacyCreate, TransactionCreate, UserCreate
+from schemas.output import PharmacyHourCreate, MaskPriceCreate
 
 
 def load_data(path):

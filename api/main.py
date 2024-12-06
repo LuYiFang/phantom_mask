@@ -6,8 +6,9 @@ from sqlalchemy.orm import Session
 import crud
 import db_models
 from database import engine, SessionLocal
-from in_out_schema import PharmacyWithHours, Transaction, PharmacyWithCount, UserTopCount, DateRange, \
-    get_date_range, TransactionSummary, PharmacyOrMask, PurchaseRequest
+from schemas.input import PurchaseRequest, DateRange, get_date_range, PagingParams, CountRangeParams, PriceRangeParams
+from schemas.output import PharmacyWithHours, PharmacyWithCount, PharmacyOrMask, Transaction, TransactionSummary, \
+    UserTopCount
 
 db_models.Base.metadata.create_all(bind=engine)
 
@@ -23,45 +24,48 @@ def get_db():
 
 
 @app.get("/pharmacies", response_model=List[PharmacyWithHours])
-def read_pharmacies(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    pharmacies = crud.get_pharmacies(db, skip=skip, limit=limit)
+def read_pharmacies(paging: PagingParams = Depends(), db: Session = Depends(get_db)):
+    pharmacies = crud.get_pharmacies(db, **paging.dict())
     return pharmacies
 
 
 @app.get("/pharmacies/{pharmacy_id}/masks", response_model=List[Transaction])
-def read_masks_by_pharmacy(pharmacy_id: int, skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    masks = crud.get_sold_masks_by_pharmacy(db, pharmacy_id=pharmacy_id, skip=skip, limit=limit)
+def read_masks_by_pharmacy(pharmacy_id: int, paging: PagingParams = Depends(), db: Session = Depends(get_db)):
+    masks = crud.get_sold_masks_by_pharmacy(db, pharmacy_id, **paging.dict())
     return masks
 
 
 @app.get("/pharmacies_by_count_and_range", response_model=List[PharmacyWithCount])
-def read_masks_by_count_abd_range(min_count: int, max_count: int,
-                                  min_price: float, max_price: float,
-                                  skip: int = 0, limit: int = 10,
+def read_masks_by_count_abd_range(count: CountRangeParams = Depends(),
+                                  price: PriceRangeParams = Depends(),
+                                  paging: PagingParams = Depends(),
                                   db: Session = Depends(get_db)):
-    return crud.get_pharmacies_by_count_and_range(db,
-                                                  min_count, max_count,
-                                                  min_price, max_price,
-                                                  skip, limit)
+    return crud.get_pharmacies_by_count_and_range(
+        db,
+        **count.dict(),
+        **price.dict(),
+        **paging.dict()
+    )
 
 
 @app.get("/top_user_amount", response_model=List[UserTopCount])
-def read_top_user_amount(
-        date_range: DateRange = Depends(get_date_range),
-        limit: int = 10, db: Session = Depends(get_db)):
-    return crud.get_top_user_amount(db, date_range.start_date, date_range.end_date, limit)
+def read_top_user_amount(date_range: DateRange = Depends(get_date_range),
+                         paging: PagingParams = Depends(),
+                         db: Session = Depends(get_db)):
+    return crud.get_top_user_amount(db, **date_range.dict(), **paging.dict())
 
 
 @app.get("/transactions/summary", response_model=TransactionSummary)
-def read_transactions_summary(
-        date_range: DateRange = Depends(get_date_range),
-        db: Session = Depends(get_db)):
-    return crud.get_transaction_mask_and_value(db, date_range.start_date, date_range.end_date)
+def read_transactions_summary(date_range: DateRange = Depends(get_date_range),
+                              db: Session = Depends(get_db)):
+    return crud.get_transaction_mask_and_value(db, **date_range.dict())
 
 
 @app.get("/search", response_model=List[PharmacyOrMask])
-def search_pharmacies_and_masks(search_term: str, limit: int = 10, db: Session = Depends(get_db)):
-    return crud.search_pharmacies_and_masks(db, search_term, limit)
+def search_pharmacies_and_masks(search_term: str,
+                                paging: PagingParams = Depends(),
+                                db: Session = Depends(get_db)):
+    return crud.search_pharmacies_and_masks(db, search_term, **paging.dict())
 
 
 @app.post("/purchase", response_model=Dict[str, int])

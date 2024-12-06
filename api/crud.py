@@ -4,16 +4,22 @@ from fastapi import HTTPException
 from sqlalchemy import func, cast, Integer, literal, update
 from sqlalchemy.orm import Session
 
+import schemas.input as schema_in
+import schemas.output as schema_out
 from db_models import Pharmacy, Mask, Transaction, MaskPrice, User
-import in_out_schema as schema
 from pprint import pprint
 
+from tools import exception_handler
+from utils import get_user_with_lock, get_pharmacy, get_mask_price
 
-def get_pharmacies(db: Session, skip: int = 0, limit: int = 100):
+
+@exception_handler
+def get_pharmacies(db: Session, skip: int = 0, limit: int = 10):
     return db.query(Pharmacy).offset(skip).limit(limit)
 
 
-def get_sold_masks_by_pharmacy(db: Session, pharmacy_id: int, skip: int = 0, limit: int = 100):
+@exception_handler
+def get_sold_masks_by_pharmacy(db: Session, pharmacy_id: int, skip: int = 0, limit: int = 10):
     transactions_with_mask_price = (
         db.query(
             Transaction.id,
@@ -55,10 +61,11 @@ def get_sold_masks_by_pharmacy(db: Session, pharmacy_id: int, skip: int = 0, lim
     ]
 
 
+@exception_handler
 def get_pharmacies_by_count_and_range(db: Session,
                                       min_count: int, max_count: int,
                                       min_price: float, max_price: float,
-                                      skip: int = 0, limit: int = 100):
+                                      skip: int = 0, limit: int = 10):
     subquery = (db.query(MaskPrice.pharmacy_id, func.count(MaskPrice.id).label('mask_count'))
                 .filter(MaskPrice.price >= min_price, MaskPrice.price <= max_price)
                 .group_by(MaskPrice.pharmacy_id)
@@ -72,12 +79,13 @@ def get_pharmacies_by_count_and_range(db: Session,
 
     results = query.all()
 
-    pharmacies_with_mask_count = [schema.Pharmacy.from_orm(pharmacy).dict() | {"mask_count": mask_count} for
+    pharmacies_with_mask_count = [schema_out.Pharmacy.from_orm(pharmacy).dict() | {"mask_count": mask_count} for
                                   pharmacy, mask_count in results]
     return pharmacies_with_mask_count
 
 
-def get_top_user_amount(db: Session, start_date, end_date, limit: int = 100):
+@exception_handler
+def get_top_user_amount(db: Session, start_date, end_date, skip: int = 0, limit: int = 10):
     return db.query(
         User.id,
         User.name,
@@ -86,9 +94,10 @@ def get_top_user_amount(db: Session, start_date, end_date, limit: int = 100):
         Transaction.date >= start_date, Transaction.date <= end_date
     ).group_by(User.id).order_by(
         func.sum(Transaction.transaction_amount).desc()
-    ).limit(limit)
+    ).offset(skip).limit(limit)
 
 
+@exception_handler
 def get_transaction_mask_and_value(db: Session, start_date, end_date):
     return (db.query(
         cast(func.sum(Transaction.transaction_amount), Integer).label('total_amount'),
@@ -103,7 +112,8 @@ def get_transaction_mask_and_value(db: Session, start_date, end_date):
             )
 
 
-def search_pharmacies_and_masks(db: Session, search_term: str, limit: int = 10):
+@exception_handler
+def search_pharmacies_and_masks(db: Session, search_term: str, skip: int = 0, limit: int = 10):
     search_str = f"%{search_term}%"
     results = (
         db.query(
@@ -124,7 +134,7 @@ def search_pharmacies_and_masks(db: Session, search_term: str, limit: int = 10):
             func.similarity(Pharmacy.name, search_term),
             func.similarity(Mask.name, search_term)
         ).desc())
-        .limit(limit)
+        .offset(skip).limit(limit)
         .all()
     )
 
@@ -139,21 +149,11 @@ def search_pharmacies_and_masks(db: Session, search_term: str, limit: int = 10):
     return output
 
 
-def purchase_mask(db: Session, purchase_request: schema.PurchaseRequest):
-    user = db.query(User).filter(User.id == purchase_request.user_id).with_for_update().first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    pharmacy = db.query(Pharmacy).filter(Pharmacy.id == purchase_request.pharmacy_id).first()
-    if not pharmacy:
-        raise HTTPException(status_code=404, detail="Pharmacy not found")
-
-    mask_price = db.query(MaskPrice).filter(
-        MaskPrice.pharmacy_id == purchase_request.pharmacy_id,
-        MaskPrice.mask_id == purchase_request.mask_id
-    ).first()
-    if not mask_price:
-        raise HTTPException(status_code=404, detail="Mask price not found")
+@exception_handler
+def purchase_mask(db: Session, purchase_request: schema_in.PurchaseRequest):
+    user = get_user_with_lock(db, purchase_request.user_id)
+    get_pharmacy(db, purchase_request.pharmacy_id)
+    mask_price = get_mask_price(db, purchase_request.pharmacy_id, purchase_request.mask_id)
 
     total_price = mask_price.price * purchase_request.amount
 
