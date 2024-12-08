@@ -79,7 +79,7 @@ def get_pharmacies_by_count_and_range(db: Session,
 
     results = query.all()
 
-    pharmacies_with_mask_count = [schema_out.Pharmacy.from_orm(pharmacy).dict() | {"mask_count": mask_count} for
+    pharmacies_with_mask_count = [schema_out.Pharmacy.from_orm(pharmacy).model_dump() | {"mask_count": mask_count} for
                                   pharmacy, mask_count in results]
     return pharmacies_with_mask_count
 

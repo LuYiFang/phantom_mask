@@ -1,45 +1,54 @@
 # Response
-> The Current content is an **example template**; please edit it to fit your style and content.
 ## A. Required Information
 ### A.1. Requirement Completion Rate
 - [x] List all pharmacies open at a specific time and on a day of the week if requested.
-  - Implemented at xxx API.
+  - Implemented at /pharmacies API.
 - [x] List all masks sold by a given pharmacy, sorted by mask name or price.
-  - Implemented at xxx API.
+  - Implemented at /pharmacies/{pharmacy_id}/masks API.
 - [x] List all pharmacies with more or less than x mask products within a price range.
-  - Implemented at xxx API.
+  - Implemented at /pharmacies_by_count_and_range API.
 - [x] The top x users by total transaction amount of masks within a date range.
-  - Implemented at xxx API.
+  - Implemented at /top_user_amount API.
 - [x] The total number of masks and dollar value of transactions within a date range.
-  - Implemented at xxx API.
+  - Implemented at /transactions/summary API.
 - [x] Search for pharmacies or masks by name, ranked by relevance to the search term.
-  - Implemented at xxx API.
+  - Implemented at /search API.
 - [x] Process a user purchases a mask from a pharmacy, and handle all relevant data changes in an atomic transaction.
-  - Implemented at xxx API.
+  - Implemented at /purchase API.
 ### A.2. API Document
-> Please describe how to use the API in the API documentation. You can edit by any format (e.g., Markdown or OpenAPI) or free tools (e.g., [hackMD](https://hackmd.io/), [postman](https://www.postman.com/), [google docs](https://docs.google.com/document/u/0/), or  [swagger](https://swagger.io/specification/)).
+#### Method 1: View Deployed Swagger UI 
+1. Open [swagger](redoc-static.html) in your browser to view the API documentation.
 
-Import [this](#api-document) json file to Postman.
+#### Method 2: Run Swagger UI Locally 
+1. Navigate to the `/api` directory in your terminal.
+2. Run the FastAPI application locally to view the documentation: 1. Start your FastAPI application: ```uvicorn main:app --reload ``` 
+3. Open your browser and navigate to `http://127.0.0.1:8000/docs` to view the API documentation.
 
 ### A.3. Import Data Commands
 Please run these two script commands to migrate the data into the database.
 
 ```bash
-$ rake import_data:pharmacies[PATH_TO_FILE]
-$ rake import_data:users[PATH_TO_FILE]
+$ python ETL.py
 ```
 ## B. Bonus Information
 
->  If you completed the bonus requirements, please fill in your task below.
 ### B.1. Test Coverage Report
 
-I wrote down the 20 unit tests for the APIs I built. Please check the test coverage report at [here](#test-coverage-report).
+I wrote down the 20 unit tests for the APIs I built. Please check the test coverage report at [here](htmlcov/index.html). You can open this in your browser to view the detailed results.
 
 You can run the test script by using the command below:
 
 ```bash
-bundle exec rspec spec
+pytest .\api\test_main.py
 ```
+
+Generate Coverage report
+
+```bash
+pytest --cov=api --cov-report=html
+```
+
+
 
 ### B.2. Dockerized
 Please check my Dockerfile / docker-compose.yml at [here](#dockerized).
@@ -68,6 +77,6 @@ My ERD [erd-link](#erd-link).
 
 ### C.2. Technical Document
 
-For frontend programmer reading, please check this [technical document](technical-document) to know how to operate those APIs.
+For frontend programmer reading, please check this [technical document](redoc-static.html) to know how to operate those APIs. You can open this in your browser to view the detailed results.
 
 - --

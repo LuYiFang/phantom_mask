@@ -1,3 +1,4 @@
+import json
 import logging
 
 from fastapi import HTTPException
@@ -23,3 +24,8 @@ def install_pg_trgm(engine):
         if not result.scalar():
             connection.execute(text("CREATE EXTENSION pg_trgm"))
             connection.commit()
+
+
+def generate_openapi_json(app):
+    with open("openapi.json", "w") as file:
+        json.dump(app.openapi(), file)

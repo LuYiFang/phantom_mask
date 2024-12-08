@@ -5,24 +5,22 @@ from pydantic import BaseModel, conint, Field
 from schemas.base import PharmacyHourBase, PharmacyBase, MaskBase, MaskPriceBase, TransactionBase, UserBase
 
 
+class OrmBase(BaseModel):
+    class Config:
+        from_attributes = True
+
+
 class PharmacyHourCreate(PharmacyHourBase):
     pharmacy: str
 
 
-class PharmacyHour(PharmacyHourBase):
+class PharmacyHour(OrmBase, PharmacyHourBase):
     id: int
     pharmacy_id: int
 
-    class Config:
-        orm_mode = True
 
-
-class Pharmacy(PharmacyBase):
+class Pharmacy(OrmBase, PharmacyBase):
     id: int
-
-    class Config:
-        orm_mode = True
-        from_attributes = True
 
 
 class PharmacyWithHours(Pharmacy):
@@ -33,11 +31,8 @@ class PharmacyWithCount(Pharmacy):
     mask_count: int
 
 
-class Mask(MaskBase):
+class Mask(OrmBase, MaskBase):
     id: int
-
-    class Config:
-        orm_mode = True
 
 
 class MaskWithPrice(Mask):
@@ -49,13 +44,10 @@ class MaskPriceCreate(MaskPriceBase):
     mask: str
 
 
-class MaskPrice(MaskPriceBase):
+class MaskPrice(OrmBase, MaskPriceBase):
     id: int
     pharmacy_id: int
     mask_id: int
-
-    class Config:
-        orm_mode = True
 
 
 class PharmacyOrMask(BaseModel):
@@ -64,43 +56,28 @@ class PharmacyOrMask(BaseModel):
     type: str
 
 
-class Transaction(TransactionBase):
+class Transaction(OrmBase, TransactionBase):
     id: int
     user_id: int
     pharmacy_id: int
     mask_id: int
     mask: MaskWithPrice
 
-    class Config:
-        orm_mode = True
 
-
-class TransactionSummary(BaseModel):
+class TransactionSummary(OrmBase, BaseModel):
     total_amount: conint(ge=0) = Field(default=0)
     total_value: float
 
-    class Config:
-        orm_mode = True
 
-
-class TransactionId(BaseModel):
+class TransactionId(OrmBase, BaseModel):
     transaction_id: int
 
-    class Config:
-        orm_mode = True
 
-
-class User(UserBase):
+class User(OrmBase, UserBase):
     id: int
 
-    class Config:
-        orm_mode = True
 
-
-class UserTopCount(BaseModel):
+class UserTopCount(OrmBase, BaseModel):
     id: int
     name: str
     total_amount: int
-
-    class Config:
-        orm_mode = True

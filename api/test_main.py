@@ -1,4 +1,5 @@
 import os
+import sys
 
 import pytest
 import toml
@@ -6,6 +7,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, func, cast, Integer
 from sqlalchemy.orm import sessionmaker
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from ETL import run
 from database import Base
 from db_models import MaskPrice, Pharmacy, Transaction, User

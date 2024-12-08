@@ -92,7 +92,7 @@ def insert_data(
     try:
 
         for pharmacy in pharmacies:
-            db.add(Pharmacy(**pharmacy.dict()))
+            db.add(Pharmacy(**pharmacy.model_dump()))
 
         for mask in masks:
             db.add(Mask(
@@ -100,7 +100,7 @@ def insert_data(
             ))
 
         for user in users:
-            db.add(User(**user.dict()))
+            db.add(User(**user.model_dump()))
 
         db.commit()
 
