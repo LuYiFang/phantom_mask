@@ -73,7 +73,8 @@ $ python ETL.py
 
 ### C.1. ERD
 
-My ERD [erd-link](#erd-link).
+![ERD.png](ERD.png)
+
 
 ### C.2. Technical Document
 
