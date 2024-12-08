@@ -10,7 +10,6 @@ class PurchaseRequest(BaseModel):
     user_id: int
     mask_id: int
     pharmacy_id: int
-    amount: int
 
 
 class DateRange(BaseModel):

@@ -1,6 +1,6 @@
 from typing import List
 
-from pydantic import BaseModel
+from pydantic import BaseModel, conint, Field
 
 from schemas.base import PharmacyHourBase, PharmacyBase, MaskBase, MaskPriceBase, TransactionBase, UserBase
 
@@ -76,8 +76,15 @@ class Transaction(TransactionBase):
 
 
 class TransactionSummary(BaseModel):
-    total_amount: int
+    total_amount: conint(ge=0) = Field(default=0)
     total_value: float
+
+    class Config:
+        orm_mode = True
+
+
+class TransactionId(BaseModel):
+    transaction_id: int
 
     class Config:
         orm_mode = True

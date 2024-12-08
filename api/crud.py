@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from fastapi import HTTPException
-from sqlalchemy import func, cast, Integer, literal, update
+from sqlalchemy import func, cast, Integer, literal, update, Float
 from sqlalchemy.orm import Session
 
 import schemas.input as schema_in
@@ -99,17 +99,10 @@ def get_top_user_amount(db: Session, start_date, end_date, skip: int = 0, limit:
 
 @exception_handler
 def get_transaction_mask_and_value(db: Session, start_date, end_date):
-    return (db.query(
-        cast(func.sum(Transaction.transaction_amount), Integer).label('total_amount'),
-        cast(func.sum(Transaction.transaction_amount * MaskPrice.price), Integer).label('total_value')
-    )
-            .filter(Transaction.date >= start_date, Transaction.date <= end_date)
-            .join(Transaction.mask)
-            .join(MaskPrice,
-                  (Transaction.mask_id == MaskPrice.mask_id) &
-                  (Transaction.pharmacy_id == MaskPrice.pharmacy_id)
-                  ).first()
-            )
+    return db.query(
+        func.count(Transaction.transaction_amount).label('total_amount'),
+        cast(func.sum(Transaction.transaction_amount), Float).label('total_value')
+    ).filter(Transaction.date >= start_date, Transaction.date <= end_date).first()
 
 
 @exception_handler
@@ -155,29 +148,27 @@ def purchase_mask(db: Session, purchase_request: schema_in.PurchaseRequest):
     get_pharmacy(db, purchase_request.pharmacy_id)
     mask_price = get_mask_price(db, purchase_request.pharmacy_id, purchase_request.mask_id)
 
-    total_price = mask_price.price * purchase_request.amount
-
-    if user.cash_balance < total_price:
+    if user.cash_balance < mask_price.price:
         raise HTTPException(status_code=400, detail="Insufficient funds")
 
     try:
         db.execute(
             update(User)
             .where(User.id == purchase_request.user_id)
-            .values(cash_balance=User.cash_balance - total_price)
+            .values(cash_balance=User.cash_balance - mask_price.price)
         )
 
         db.execute(
             update(Pharmacy)
             .where(Pharmacy.id == purchase_request.pharmacy_id)
-            .values(cash_balance=Pharmacy.cash_balance + total_price)
+            .values(cash_balance=Pharmacy.cash_balance + mask_price.price)
         )
 
         transaction = Transaction(
             user_id=purchase_request.user_id,
             pharmacy_id=purchase_request.pharmacy_id,
             mask_id=purchase_request.mask_id,
-            transaction_amount=purchase_request.amount,
+            transaction_amount=mask_price.price,
             date=datetime.utcnow(),
         )
         db.add(transaction)

@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List
 
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
@@ -8,11 +8,17 @@ import db_models
 from database import engine, SessionLocal
 from schemas.input import PurchaseRequest, DateRange, get_date_range, PagingParams, CountRangeParams, PriceRangeParams
 from schemas.output import PharmacyWithHours, PharmacyWithCount, PharmacyOrMask, Transaction, TransactionSummary, \
-    UserTopCount
+    UserTopCount, TransactionId
+from tools import install_pg_trgm
 
 db_models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+
+@app.on_event("startup")
+def startup_event():
+    install_pg_trgm(engine)
 
 
 def get_db():
@@ -68,7 +74,7 @@ def search_pharmacies_and_masks(search_term: str,
     return crud.search_pharmacies_and_masks(db, search_term, **paging.dict())
 
 
-@app.post("/purchase", response_model=Dict[str, int])
+@app.post("/purchase", response_model=TransactionId)
 def purchase_masks(purchase_request: PurchaseRequest, db: Session = Depends(get_db)):
     transaction_id = crud.purchase_mask(db, purchase_request)
     return {'transaction_id': transaction_id}
