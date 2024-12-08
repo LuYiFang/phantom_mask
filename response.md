@@ -21,14 +21,20 @@
 
 #### Method 2: Run Swagger UI Locally 
 1. Navigate to the `/api` directory in your terminal.
-2. Run the FastAPI application locally to view the documentation: 1. Start your FastAPI application: ```uvicorn main:app --reload ``` 
+2. Run the FastAPI application locally to view the documentation: 
+   Start your FastAPI application: 
+
+```
+uvicorn main:app --host "0.0.0.0" --reload 
+```
+
 3. Open your browser and navigate to `http://127.0.0.1:8000/docs` to view the API documentation.
 
 ### A.3. Import Data Commands
 Please run these two script commands to migrate the data into the database.
 
 ```bash
-$ python ETL.py
+python ETL.py
 ```
 ## B. Bonus Information
 
@@ -39,7 +45,7 @@ I wrote down the 20 unit tests for the APIs I built. Please check the test cover
 You can run the test script by using the command below:
 
 ```bash
-pytest .\api\test_main.py
+pytest ./api/test_main.py
 ```
 
 Generate Coverage report
@@ -51,23 +57,17 @@ pytest --cov=api --cov-report=html
 
 
 ### B.2. Dockerized
-Please check my Dockerfile / docker-compose.yml at [here](#dockerized).
+Please check my Dockerfile at [here](Dockerfile) / docker-compose.yml at at [here](docker-compose.yml). 
 
 On the local machine, please follow the commands below to build it.
 
 ```bash
-$ docker build --build-arg ENV=development -p 80:3000 -t my-project:1.0.0 .  
+$ docker-compose build
 $ docker-compose up -d
 
-# go inside the container, run the migrate data command.
-$ docker exec -it my-project bash
-$ rake import_data:pharmacies[PATH_TO_FILE] 
-$ rake import_data:user[PATH_TO_FILE]
+$ docker exec -it phantom-mask-api bash
+$ python ETL.py
 ```
-
-### B.3. Demo Site Url
-
-The demo site is ready on [my AWS demo site](#demo-site-url); you can try any APIs on this demo site.
 
 ## C. Other Information
 

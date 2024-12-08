@@ -12,14 +12,9 @@ from ETL import run
 from database import Base
 from db_models import MaskPrice, Pharmacy, Transaction, User
 from main import get_db, app
-from tools import install_pg_trgm
+from tools import install_pg_trgm, TEST_DATABASE_URL
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-config_path = os.path.join(current_dir, 'config.toml')
-config = toml.load(config_path)
-db_config = config['database']
-SQLALCHEMY_DATABASE_URL = db_config['test_url']
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+engine = create_engine(TEST_DATABASE_URL)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
