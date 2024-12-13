@@ -1,9 +1,26 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Numeric, Time, DateTime
+"""
+db_models.py
+------------
+
+This module defines the SQLAlchemy database models for the application.
+The models include Pharmacy, PharmacyHour, Mask, MaskPrice, User,
+and Transaction.
+
+Each model represents a table in the database with relationships and attributes
+required for the application's functionality.
+"""
+
+from sqlalchemy import (Column, Integer, String, ForeignKey, Numeric, Time,
+                        DateTime)
 from sqlalchemy.orm import relationship
-from database import Base
+
+from database.database import Base
 
 
 class Pharmacy(Base):
+    """
+    Represents a pharmacy.
+    """
     __tablename__ = 'pharmacies'
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
@@ -18,6 +35,9 @@ class Pharmacy(Base):
 
 
 class PharmacyHour(Base):
+    """
+    Represents the operating hours of a pharmacy.
+    """
     __tablename__ = 'pharmacy_hours'
     id = Column(Integer, primary_key=True, index=True)
     pharmacy_id = Column(Integer, ForeignKey('pharmacies.id'))
@@ -28,6 +48,9 @@ class PharmacyHour(Base):
 
 
 class Mask(Base):
+    """
+    Represents a mask.
+    """
     __tablename__ = 'masks'
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
@@ -36,6 +59,9 @@ class Mask(Base):
 
 
 class MaskPrice(Base):
+    """
+    Represents the price of a mask at a specific pharmacy.
+    """
     __tablename__ = 'mask_prices'
     id = Column(Integer, primary_key=True, index=True)
     pharmacy_id = Column(Integer, ForeignKey('pharmacies.id'))
@@ -46,6 +72,9 @@ class MaskPrice(Base):
 
 
 class User(Base):
+    """
+    Represents a user.
+    """
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
@@ -54,6 +83,9 @@ class User(Base):
 
 
 class Transaction(Base):
+    """
+    Represents a transaction.
+    """
     __tablename__ = 'transactions'
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)

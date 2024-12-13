@@ -2,17 +2,21 @@ import os
 import sys
 
 import pytest
-import toml
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, func, cast, Integer
 from sqlalchemy.orm import sessionmaker
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from ETL import run
-from database import Base
-from db_models import MaskPrice, Pharmacy, Transaction, User
-from main import get_db, app
-from tools import install_pg_trgm, TEST_DATABASE_URL
+from database.database import Base, get_db
+from database.db_models import MaskPrice, Pharmacy, Transaction, User
+from main import app
+from utils.tools import install_pg_trgm
+from config.config import (POSTGRES_USER, POSTGRES_PASSWORD,
+                           POSTGRES_HOST, POSTGRES_TEST_DB, POSTGRES_PORT)
+
+TEST_DATABASE_URL = (f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@"
+                     f"{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_TEST_DB}")
 
 engine = create_engine(TEST_DATABASE_URL)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

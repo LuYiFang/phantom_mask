@@ -7,8 +7,8 @@ import re
 
 from sqlalchemy.orm import Session
 
-from database import SessionLocal
-from db_models import Pharmacy, Mask, MaskPrice, PharmacyHour, Transaction, User
+from database.database import SessionLocal
+from database.db_models import Pharmacy, Mask, MaskPrice, PharmacyHour, Transaction, User
 from schemas.input import PharmacyCreate, TransactionCreate, UserCreate
 from schemas.output import PharmacyHourCreate, MaskPriceCreate
 
