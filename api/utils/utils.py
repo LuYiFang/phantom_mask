@@ -7,7 +7,7 @@ This module provides utility functions for interacting with database entities.
 
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
-from database.db_models import User, Pharmacy, MaskPrice
+from api.database.db_models import User, Pharmacy, PharmacyMask
 
 
 def get_user_with_lock(db: Session, user_id: int):
@@ -34,9 +34,9 @@ def get_mask_price(db: Session, pharmacy_id: int, mask_id: int):
     """
     Retrieve the price of a mask at a specific pharmacy.
     """
-    mask_price = db.query(MaskPrice).filter(
-        MaskPrice.pharmacy_id == pharmacy_id,
-        MaskPrice.mask_id == mask_id
+    mask_price = db.query(PharmacyMask).filter(
+        PharmacyMask.pharmacy_id == pharmacy_id,
+        PharmacyMask.mask_id == mask_id
     ).first()
     if not mask_price:
         raise HTTPException(status_code=404, detail="Mask price not found")

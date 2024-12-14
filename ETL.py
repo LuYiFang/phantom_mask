@@ -7,10 +7,10 @@ import re
 
 from sqlalchemy.orm import Session
 
-from database.database import SessionLocal
-from database.db_models import Pharmacy, Mask, MaskPrice, PharmacyHour, Transaction, User
-from schemas.input import PharmacyCreate, TransactionCreate, UserCreate
-from schemas.output import PharmacyHourCreate, MaskPriceCreate
+from api.database.database import SessionLocal
+from api.database.db_models import Pharmacy, Mask, PharmacyMask, PharmacyHour, Transaction, User
+from api.schemas.input import PharmacyCreate, TransactionCreate, UserCreate
+from api.schemas.output import PharmacyHourCreate, MaskPriceCreate
 
 
 def load_data(path):
@@ -109,7 +109,7 @@ def insert_data(
         user_dict = {user.name: user.id for user in db.query(User).all()}
 
         for price in prices:
-            db.add(MaskPrice(
+            db.add(PharmacyMask(
                 pharmacy_id=pharmacy_dict[price.pharmacy],
                 mask_id=mask_dict[price.mask],
                 price=price.price,

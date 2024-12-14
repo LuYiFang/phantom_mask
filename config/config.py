@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 ENV = os.getenv("ENV", "development")
 
 if ENV == "development":
-    load_dotenv(dotenv_path="../.env")
+    load_dotenv(dotenv_path=".env")
 elif ENV == "testing":
     load_dotenv(dotenv_path=".env.testing")
 elif ENV == "production":

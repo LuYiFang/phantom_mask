@@ -10,12 +10,12 @@ from fastapi import HTTPException
 from sqlalchemy import func, cast, Integer, literal, update, Float
 from sqlalchemy.orm import Session
 
-import schemas.input as schema_in
-import schemas.output as schema_out
-from database.db_models import Pharmacy, Mask, Transaction, MaskPrice, User
+import api.schemas.input as schema_in
+import api.schemas.output as schema_out
+from api.database.db_models import Pharmacy, Mask, Transaction, PharmacyMask, User
 
-from utils.tools import exception_handler
-from utils.utils import get_user_with_lock, get_pharmacy, get_mask_price
+from api.utils.tools import exception_handler
+from api.utils.utils import get_user_with_lock, get_pharmacy, get_mask_price
 
 
 @exception_handler
@@ -43,15 +43,15 @@ def get_sold_masks_by_pharmacy(
             Transaction.pharmacy_id,
             Transaction.mask_id,
             Mask.name.label('mask_name'),
-            MaskPrice.price.label('mask_price')
+            PharmacyMask.price.label('mask_price')
         )
         .filter(Transaction.pharmacy_id == pharmacy_id)
         .join(Transaction.mask)
-        .join(MaskPrice,
-              (Transaction.mask_id == MaskPrice.mask_id) &
-              (Transaction.pharmacy_id == MaskPrice.pharmacy_id)
+        .join(PharmacyMask,
+              (Transaction.mask_id == PharmacyMask.mask_id) &
+              (Transaction.pharmacy_id == PharmacyMask.pharmacy_id)
               )
-        .order_by(Mask.name, MaskPrice.price)
+        .order_by(Mask.name, PharmacyMask.price)
         .offset(paging.skip)
         .limit(paging.limit)
         .all()
@@ -87,16 +87,16 @@ def get_pharmacies_by_count_and_range(
     """
     subquery = (
         db.query(
-            MaskPrice.pharmacy_id,
-            func.count(MaskPrice.id).label('mask_count')
+            PharmacyMask.pharmacy_id,
+            func.count(PharmacyMask.id).label('mask_count')
         )
         .filter(
-            MaskPrice.price >= price.min_price,
-            MaskPrice.price <= price.max_price
+            PharmacyMask.price >= price.min_price,
+            PharmacyMask.price <= price.max_price
         )
-        .group_by(MaskPrice.pharmacy_id)
+        .group_by(PharmacyMask.pharmacy_id)
         .having(
-            func.count(MaskPrice.id).between(count.min_count, count.max_count)
+            func.count(PharmacyMask.id).between(count.min_count, count.max_count)
         )
         .subquery()
     )

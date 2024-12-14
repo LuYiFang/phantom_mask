@@ -8,10 +8,10 @@ from sqlalchemy.orm import sessionmaker
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from ETL import run
-from database.database import Base, get_db
-from database.db_models import MaskPrice, Pharmacy, Transaction, User
-from main import app
-from utils.tools import install_pg_trgm
+from api.database.database import Base, get_db
+from api.database.db_models import PharmacyMask, Pharmacy, Transaction, User
+from api.main import app
+from api.utils.tools import install_pg_trgm
 from config.config import (POSTGRES_USER, POSTGRES_PASSWORD,
                            POSTGRES_HOST, POSTGRES_TEST_DB, POSTGRES_PORT)
 
@@ -94,10 +94,10 @@ def test_read_pharmacies_by_count_and_range(client):
 
 def get_mask_count_in_price_range(pharmacy_id, min_price, max_price):
     db = TestingSessionLocal()
-    count = db.query(func.count(MaskPrice.id)).filter(
-        MaskPrice.pharmacy_id == pharmacy_id,
-        MaskPrice.price >= min_price,
-        MaskPrice.price <= max_price
+    count = db.query(func.count(PharmacyMask.id)).filter(
+        PharmacyMask.pharmacy_id == pharmacy_id,
+        PharmacyMask.price >= min_price,
+        PharmacyMask.price <= max_price
     ).scalar()
     db.close()
     return count
@@ -164,7 +164,7 @@ def get_transactions_and_prices_with_sqlalchemy(start_date, end_date):
         Transaction.date <= end_date
     ).all()
 
-    mask_prices = {f'{mp.mask_id}{mp.pharmacy_id}': mp.price for mp in db.query(MaskPrice).all()}
+    mask_prices = {f'{mp.mask_id}{mp.pharmacy_id}': mp.price for mp in db.query(PharmacyMask).all()}
 
     db.close()
     return transactions, mask_prices
@@ -202,8 +202,8 @@ def test_purchase_single_mask(client):
     db = TestingSessionLocal()
     user = db.query(User).filter(User.id == user_id).first()
     pharmacy = db.query(Pharmacy).filter(Pharmacy.id == pharmacy_id).first()
-    mask_price_record = db.query(MaskPrice).filter(MaskPrice.mask_id == mask_id,
-                                                   MaskPrice.pharmacy_id == pharmacy_id).first()
+    mask_price_record = db.query(PharmacyMask).filter(PharmacyMask.mask_id == mask_id,
+                                                      PharmacyMask.pharmacy_id == pharmacy_id).first()
 
     assert user is not None, f"User with ID {user_id} not found"
     assert pharmacy is not None, f"Pharmacy with ID {pharmacy_id} not found"

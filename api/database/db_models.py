@@ -14,7 +14,7 @@ from sqlalchemy import (Column, Integer, String, ForeignKey, Numeric, Time,
                         DateTime)
 from sqlalchemy.orm import relationship
 
-from database.database import Base
+from api.database.database import Base
 
 
 class Pharmacy(Base):
@@ -58,7 +58,7 @@ class Mask(Base):
     transactions = relationship("Transaction", back_populates="mask")
 
 
-class MaskPrice(Base):
+class PharmacyMask(Base):
     """
     Represents the price of a mask at a specific pharmacy.
     """
