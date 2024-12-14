@@ -1,5 +1,5 @@
 """
-input.py
+input_schema.py
 --------
 
 This module defines the Pydantic models for input validation and
@@ -10,7 +10,9 @@ required for the various API endpoints.
 from datetime import datetime
 from fastapi import Query
 from pydantic import BaseModel, PositiveInt, Field, conint
-from schemas.base import PharmacyBase, MaskBase, TransactionBase, UserBase
+from api.schemas.base_schema import (PharmacyBase, MaskBase, TransactionBase,
+                                     UserBase, PharmacyMaskBase,
+                                     PharmacyHourBase)
 
 
 class PurchaseRequest(BaseModel):
@@ -69,10 +71,25 @@ class PharmacyCreate(PharmacyBase):
     """
 
 
+class PharmacyHourCreate(PharmacyHourBase):
+    """
+    Model for creating a pharmacy hour entry.
+    """
+    pharmacy: str
+
+
 class MaskCreate(MaskBase):
     """
     Represents the creation of a new mask.
     """
+
+
+class PharmacyMaskCreate(PharmacyMaskBase):
+    """
+    Represents the creation of a new pharmacy mask.
+    """
+    pharmacy: str
+    mask: str
 
 
 class TransactionCreate(TransactionBase):

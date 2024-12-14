@@ -8,9 +8,8 @@ import re
 from sqlalchemy.orm import Session
 
 from api.database.database import SessionLocal
-from api.database.db_models import Pharmacy, Mask, PharmacyMask, PharmacyHour, Transaction, User
-from api.schemas.input import PharmacyCreate, TransactionCreate, UserCreate
-from api.schemas.output import PharmacyHourCreate, MaskPriceCreate
+import api.database.db_models as db_mod
+from api.schemas import input_schema as in_sch
 
 
 def load_data(path):
@@ -21,27 +20,29 @@ def load_data(path):
 def parse_pharmacies(data):
     full_days = ['Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat', 'Sun']
 
-    def expand_days(days_part):
-        if '-' in days_part:
-            start_day, end_day = list(map(lambda x: x.strip(), days_part.split('-')))
+    def expand_days(_days_part):
+        if '-' in _days_part:
+            start_day, end_day = list(
+                map(lambda x: x.strip(), _days_part.split('-'))
+            )
             start_idx = full_days.index(start_day)
             end_idx = full_days.index(end_day)
             return full_days[start_idx:end_idx + 1]
 
-        return list(map(lambda x: x.strip(), days_part.split(',')))
+        return list(map(lambda x: x.strip(), _days_part.split(',')))
 
     pharmacies = []
     masks = {}
     prices = []
     pharmacy_hours = []
     for pharmacy in data:
-        pharmacies.append(PharmacyCreate(
+        pharmacies.append(in_sch.PharmacyCreate(
             name=pharmacy.get('name'),
             cash_balance=pharmacy.get('cashBalance')
         ))
         for mask in pharmacy.get('masks'):
             masks[mask.get('name')] = 1
-            prices.append(MaskPriceCreate(
+            prices.append(in_sch.PharmacyMaskCreate(
                 pharmacy=pharmacy.get('name'),
                 mask=mask.get('name'),
                 price=mask.get('price')
@@ -53,7 +54,7 @@ def parse_pharmacies(data):
             days_part, open_time, close_time = match.groups()
             days = expand_days(days_part)
             for day in days:
-                pharmacy_hours.append(PharmacyHourCreate(
+                pharmacy_hours.append(in_sch.PharmacyHourCreate(
                     pharmacy=pharmacy.get('name'),
                     day_of_week=day,
                     open_time=open_time,
@@ -65,12 +66,12 @@ def parse_users(data):
     users = []
     transactions = []
     for user in data:
-        users.append(UserCreate(
+        users.append(in_sch.UserCreate(
             name=user.get('name'),
             cash_balance=user.get('cashBalance')
         ))
         for transaction in user.get('purchaseHistories'):
-            transactions.append(TransactionCreate(
+            transactions.append(in_sch.TransactionCreate(
                 user=user.get('name'),
                 pharmacy=transaction.get('pharmacyName'),
                 mask=transaction.get('maskName'),
@@ -81,42 +82,43 @@ def parse_users(data):
 
 
 def insert_data(
-        db: Session,
-        pharmacies: List[PharmacyCreate],
-        pharmacy_hours: List[PharmacyHourCreate],
+        _db: Session,
+        pharmacies: List[in_sch.PharmacyCreate],
+        pharmacy_hours: List[in_sch.PharmacyHourCreate],
         masks: list[str],
-        prices: List[MaskPriceCreate],
-        users: List[UserCreate],
-        transactions: List[TransactionCreate]
+        prices: List[in_sch.PharmacyMaskCreate],
+        users: List[in_sch.UserCreate],
+        transactions: List[in_sch.TransactionCreate]
 ):
     try:
 
         for pharmacy in pharmacies:
-            db.add(Pharmacy(**pharmacy.model_dump()))
+            _db.add(db_mod.Pharmacy(**pharmacy.model_dump()))
 
         for mask in masks:
-            db.add(Mask(
+            _db.add(db_mod.Mask(
                 name=mask,
             ))
 
         for user in users:
-            db.add(User(**user.model_dump()))
+            _db.add(db_mod.User(**user.model_dump()))
 
-        db.commit()
+        _db.commit()
 
-        pharmacy_dict = {pharmacy.name: pharmacy.id for pharmacy in db.query(Pharmacy).all()}
-        mask_dict = {mask.name: mask.id for mask in db.query(Mask).all()}
-        user_dict = {user.name: user.id for user in db.query(User).all()}
+        pharmacy_dict = {pharmacy.name: pharmacy.id for pharmacy in
+                         _db.query(db_mod.Pharmacy).all()}
+        mask_dict = {mask.name: mask.id for mask in _db.query(db_mod.Mask).all()}
+        user_dict = {user.name: user.id for user in _db.query(db_mod.User).all()}
 
         for price in prices:
-            db.add(PharmacyMask(
+            _db.add(db_mod.PharmacyMask(
                 pharmacy_id=pharmacy_dict[price.pharmacy],
                 mask_id=mask_dict[price.mask],
                 price=price.price,
             ))
 
         for hours in pharmacy_hours:
-            db.add(PharmacyHour(
+            _db.add(db_mod.PharmacyHour(
                 pharmacy_id=pharmacy_dict[hours.pharmacy],
                 day_of_week=hours.day_of_week,
                 open_time=hours.open_time,
@@ -124,7 +126,7 @@ def insert_data(
             ))
 
         for transaction in transactions:
-            db.add(Transaction(
+            _db.add(db_mod.Transaction(
                 user_id=user_dict[transaction.user],
                 pharmacy_id=pharmacy_dict[transaction.pharmacy],
                 mask_id=mask_dict[transaction.mask],
@@ -132,12 +134,12 @@ def insert_data(
                 date=transaction.date,
             ))
 
-        db.commit()
+        _db.commit()
     except Exception as e:
-        db.rollback()
+        _db.rollback()
         raise e
     finally:
-        db.close()
+        _db.close()
 
 
 def run(db):
@@ -150,7 +152,8 @@ def run(db):
     user_raw = load_data(users_path)
     users, transactions = parse_users(user_raw)
 
-    insert_data(db, pharmacies, pharmacy_hours, masks, prices, users, transactions)
+    insert_data(db, pharmacies, pharmacy_hours, masks, prices, users,
+                transactions)
 
 
 if __name__ == "__main__":

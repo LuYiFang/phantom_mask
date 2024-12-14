@@ -1,5 +1,5 @@
 """
-base.py
+base_schema.py
 -------
 
 This module defines the Pydantic base models for input and output schemas.
@@ -35,7 +35,7 @@ class MaskBase(BaseModel):
     name: str
 
 
-class MaskPriceBase(BaseModel):
+class PharmacyMaskBase(BaseModel):
     """
     Represents the base model for a mask price.
     """

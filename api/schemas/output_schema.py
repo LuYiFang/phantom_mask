@@ -1,5 +1,5 @@
 """
-output.py
+output_schema.py
 ---------
 
 This module defines the Pydantic models for output schemas.
@@ -7,8 +7,9 @@ This module defines the Pydantic models for output schemas.
 
 from typing import List
 from pydantic import BaseModel, conint, Field
-from schemas.base import (PharmacyHourBase, PharmacyBase, MaskBase,
-                          MaskPriceBase, TransactionBase, UserBase)
+from api.schemas.base_schema import (PharmacyHourBase, PharmacyBase, MaskBase,
+                                     PharmacyMaskBase, TransactionBase,
+                                     UserBase)
 
 
 class OrmBase(BaseModel):
@@ -21,13 +22,6 @@ class OrmBase(BaseModel):
         Pydantic configuration class for ORM models.
         """
         from_attributes = True
-
-
-class PharmacyHourCreate(PharmacyHourBase):
-    """
-    Model for creating a pharmacy hour entry.
-    """
-    pharmacy: str
 
 
 class PharmacyHour(OrmBase, PharmacyHourBase):
@@ -73,15 +67,7 @@ class MaskWithPrice(Mask):
     price: float
 
 
-class MaskPriceCreate(MaskPriceBase):
-    """
-    Model for creating a mask price entry.
-    """
-    pharmacy: str
-    mask: str
-
-
-class MaskPrice(OrmBase, MaskPriceBase):
+class PharmacyMask(OrmBase, PharmacyMaskBase):
     """
     Model representing a mask price.
     """
