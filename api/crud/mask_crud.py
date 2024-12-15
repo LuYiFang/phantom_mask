@@ -6,12 +6,13 @@ This module contains CRUD operations for managing mask records
 in the database.
 """
 
-from sqlalchemy import func
+from sqlalchemy import func, literal
 from sqlalchemy.orm import Session
 
 from api.database import db_models as db_mod
 from api.enums import SortType
 from api.schemas import input_schema as in_sch, output_schema as out_sch
+from config.config import SIMILARITY_THRESHOLD
 
 
 def get_mask(db: Session, mask_id: int):
@@ -29,19 +30,6 @@ def create_mask(db: Session, mask: db_mod.Mask):
     db.commit()
     db.refresh(mask)
     return mask
-
-
-def search_masks(db: Session, search_term: str):
-    """
-    Search for masks by name, using trigrams for fuzzy matching,
-    ranked by relevance to the search term.
-    """
-    return (
-        db.query(db_mod.Mask)
-        .filter(func.similarity(db_mod.Mask.name, search_term) > 0.1)
-        .order_by(func.similarity(db_mod.Mask.name, search_term).desc())
-        .all()
-    )
 
 
 def list_pharmacy_masks(
@@ -100,3 +88,22 @@ def get_mask_summary(
         mask_name=row.mask_name,
         mask_count=row.mask_count,
         total_value=row.total_value) for row in result]
+
+
+def search_masks(db: Session, search_term: str, ):
+    """
+    Search for masks by name, using trigrams for fuzzy matching,
+    ranked by relevance to the search term.
+    """
+    return (
+        db.query(
+            db_mod.Mask.id,
+            db_mod.Mask.name,
+            func.similarity(
+                db_mod.Mask.name, search_term
+            ).label('similarity'),
+            literal("mask").label('type')
+        ).filter(
+            func.similarity(db_mod.Mask.name, search_term) > SIMILARITY_THRESHOLD
+        )
+    )

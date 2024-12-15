@@ -135,3 +135,9 @@ class UserTransactionSummary(OrmBase, BaseModel):
     id: int
     name: str
     total_amount: float
+
+
+class SearchResult(OrmBase, BaseModel):
+    id: int
+    name: str
+    type: str

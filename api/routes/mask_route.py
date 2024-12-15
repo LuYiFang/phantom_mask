@@ -31,15 +31,7 @@ def create_mask(mask: in_sch.MaskCreate, db: Session = Depends(get_db)):
     """
     Create a new mask.
     """
-    return mask_service.add_new_mask(db, mask)
-
-
-@router.get("/masks/search", response_model=List[out_sch.Mask])
-def search_masks(search_term: str, db: Session = Depends(get_db)):
-    """
-    Search for masks by name, ranked by relevance to the search term.
-    """
-    return mask_service.search_masks(db, search_term)
+    return mask_service.create_mask(db, mask)
 
 
 @router.get("/masks/pharmacies/{pharmacy_id}",

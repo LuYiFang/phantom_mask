@@ -68,15 +68,7 @@ def create_pharmacy(
         pharmacy_data: in_sch.PharmacyCreate
 ):
     """
-    Add a new pharmacy to the database.
+    Create a new pharmacy to the database.
     """
     new_pharmacy = db_mod.Pharmacy(**pharmacy_data.dict())
     return pharmacy_crud.create_pharmacy(db, new_pharmacy)
-
-
-@exception_handler
-def search_pharmacies(db: Session, search_term: str):
-    """
-    Search for pharmacies by name, ranked by relevance to the search term.
-    """
-    return pharmacy_crud.search_pharmacies(db, search_term)

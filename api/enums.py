@@ -19,3 +19,9 @@ class SortType(str, Enum):
 class ComparisonType(str, Enum):
     MORE = "more"
     LESS = "less"
+
+
+class SearchType(str, Enum):
+    PHARMACY = "pharmacy"
+    MASK = "mask"
+    ALL = "all"

@@ -7,12 +7,13 @@ in the database.
 """
 from datetime import time
 
-from sqlalchemy import func, and_
+from sqlalchemy import func, and_, literal
 from sqlalchemy.orm import Session
 
 import api.database.db_models as db_mod
 from api.enums import DayOfWeek, ComparisonType
 from api.schemas import input_schema as in_sch
+from config.config import SIMILARITY_THRESHOLD
 
 
 def get_pharmacy(db: Session, pharmacy_id: int):
@@ -101,16 +102,20 @@ def create_pharmacy(db: Session, pharmacy: db_mod.Pharmacy):
     return pharmacy
 
 
-def search_pharmacies(db: Session, search_term: str):
+def search_pharmacies(db: Session, search_term: str,):
     """
     Search for pharmacies by name, using trigrams for fuzzy matching,
     ranked by relevance to the search term.
     """
     return (
-        db.query(db_mod.Pharmacy)
-        .filter(func.similarity(db_mod.Pharmacy.name, search_term) > 0.1)
-        .order_by(
-            func.similarity(db_mod.Pharmacy.name, search_term).desc()
+        db.query(
+            db_mod.Pharmacy.id,
+            db_mod.Pharmacy.name,
+            func.similarity(
+                db_mod.Pharmacy.name, search_term
+            ).label('similarity'),
+            literal("pharmacy").label('type')
+        ).filter(
+            func.similarity(db_mod.Pharmacy.name, search_term) > SIMILARITY_THRESHOLD
         )
-        .all()
     )

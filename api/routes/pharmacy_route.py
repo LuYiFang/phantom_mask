@@ -73,11 +73,3 @@ def create_pharmacy(pharmacy: in_sch.PharmacyCreate,
     Create a new pharmacy.
     """
     return pharmacy_service.create_pharmacy(db, pharmacy)
-
-
-@router.get("/pharmacies/search", response_model=List[out_sch.Pharmacy])
-def search_pharmacies(search_term: str, db: Session = Depends(get_db)):
-    """
-    Search for pharmacies by name, ranked by relevance to the search term.
-    """
-    return pharmacy_service.search_pharmacies(db, search_term)
