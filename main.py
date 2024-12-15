@@ -12,6 +12,7 @@ from api.database import db_models
 from api.database.database import engine
 from api.routes.pharmacy_route import router as pharmacy_router
 from api.routes.mask_route import router as mask_router
+from api.routes.user_route import router as user_router
 from api.routes.transaction_route import router as transaction_router
 from api.utils.tools import install_pg_trgm, generate_openapi_json
 
@@ -35,6 +36,7 @@ app = FastAPI(lifespan=lifespan)
 # Include routers for the API endpoints
 app.include_router(pharmacy_router)
 app.include_router(mask_router)
+app.include_router(user_router)
 app.include_router(transaction_router)
 
 if __name__ == "__main__":

@@ -90,7 +90,7 @@ def get_mask_summary(
             date_range.end_date
         )
     ).join(
-        db_mod.Transaction, db_mod.Transaction.mask_id == db_mod.Mask.id
+        db_mod.Transaction
     ).group_by(
         db_mod.Mask.id
     ).all()

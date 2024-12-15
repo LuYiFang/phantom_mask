@@ -128,10 +128,10 @@ class User(OrmBase, UserBase):
     id: int
 
 
-class UserTopCount(OrmBase, BaseModel):
+class UserTransactionSummary(OrmBase, BaseModel):
     """
     Model representing the top users by transaction amount.
     """
     id: int
     name: str
-    total_amount: int
+    total_amount: float
