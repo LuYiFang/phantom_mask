@@ -9,7 +9,6 @@ from typing import List
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-import api.services.mask_service
 from api.database.database import get_db
 from api.enums import SortType
 from api.schemas import input_schema as in_sch, output_schema as out_sch
@@ -45,7 +44,7 @@ def list_pharmacy_masks(
     """
     List all masks sold by a given pharmacy, sorted by mask name or price.
     """
-    return api.services.mask_service.list_pharmacy_masks(db, pharmacy_id,
+    return mask_service.list_pharmacy_masks(db, pharmacy_id,
                                                          sort_by, paging)
 
 
@@ -59,4 +58,4 @@ def get_mask_summary(
     Retrieve the total amount of masks and dollar value of transactions within
     a date range.
     """
-    return api.services.mask_service.get_mask_summary(db, date_range)
+    return mask_service.get_mask_summary(db, date_range)
