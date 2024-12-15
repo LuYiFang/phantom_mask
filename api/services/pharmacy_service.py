@@ -11,26 +11,30 @@ from api.crud import pharmacy_crud
 import api.database.db_models as db_mod
 from api.enums import DayOfWeek
 from api.schemas import input_schema as in_sch
+from api.utils.tools import exception_handler
 
 
-def get_pharmacy_details(db: Session, pharmacy_id: int):
+@exception_handler
+def read_pharmacy_details(db: Session, pharmacy_id: int):
     """
     Get detailed information for a specific pharmacy.
     """
-    return pharmacy_crud.get_pharmacy(db, pharmacy_id)
+    return pharmacy_crud.read_pharmacy(db, pharmacy_id)
 
 
-def get_pharmacies(
+@exception_handler
+def list_pharmacies(
         db: Session,
         paging: in_sch.PagingParams
 ):
     """
     Get a list of pharmacies with pagination.
     """
-    return pharmacy_crud.get_pharmacies(db, paging)
+    return pharmacy_crud.list_pharmacies(db, paging)
 
 
-def get_pharmacies_open_at(
+@exception_handler
+def list_pharmacies_open_at(
         db: Session,
         query_time: time,
         day_of_week: DayOfWeek,
@@ -39,9 +43,24 @@ def get_pharmacies_open_at(
     """
     Retrieve pharmacies open at a specific time and day of the week.
     """
-    return pharmacy_crud.get_pharmacies_open_at(db, query_time, day_of_week, paging)
+    return pharmacy_crud.list_pharmacies_open_at(db, query_time, day_of_week,
+                                                 paging)
 
 
+@exception_handler
+def list_pharmacy_masks(
+        db: Session,
+        pharmacy_id: int,
+        sort_by: str,
+        paging: in_sch.PagingParams,
+):
+    """
+    List all masks sold by a given pharmacy, sorted by mask name or price.
+    """
+    return pharmacy_crud.list_pharmacy_masks(db, pharmacy_id, sort_by, paging)
+
+
+@exception_handler
 def add_new_pharmacy(
         db: Session,
         pharmacy_data: in_sch.PharmacyCreate
@@ -53,6 +72,7 @@ def add_new_pharmacy(
     return pharmacy_crud.create_pharmacy(db, new_pharmacy)
 
 
+@exception_handler
 def search_pharmacies(db: Session, search_term: str):
     """
     Search for pharmacies by name, ranked by relevance to the search term.

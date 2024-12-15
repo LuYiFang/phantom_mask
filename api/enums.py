@@ -2,10 +2,15 @@ from enum import Enum
 
 
 class DayOfWeek(str, Enum):
-    Mon = "Mon"
-    Tue = "Tue"
-    Wed = "Wed"
-    Thur = "Thur"
-    Fri = "Fri"
-    Sat = "Sat"
-    Sun = "Sun"
+    MON = "Mon"
+    TUE = "Tue"
+    WED = "Wed"
+    THUR = "Thur"
+    FRI = "Fri"
+    SAT = "Sat"
+    SUN = "Sun"
+
+
+class SortType(str, Enum):
+    NAME = "name"
+    PRICE = "price"

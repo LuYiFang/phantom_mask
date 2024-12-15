@@ -11,12 +11,11 @@ from sqlalchemy import func, and_
 from sqlalchemy.orm import Session
 
 import api.database.db_models as db_mod
-from api.enums import DayOfWeek
+from api.enums import DayOfWeek, SortType
 from api.schemas import input_schema as in_sch
-from api.utils.tools import exception_handler
 
 
-def get_pharmacy(db: Session, pharmacy_id: int):
+def read_pharmacy(db: Session, pharmacy_id: int):
     """
     Retrieve a pharmacy by its ID.
     """
@@ -27,15 +26,14 @@ def get_pharmacy(db: Session, pharmacy_id: int):
     )
 
 
-@exception_handler
-def get_pharmacies(db: Session, paging: in_sch.PagingParams):
+def list_pharmacies(db: Session, paging: in_sch.PagingParams):
     """
     Retrieve a list of pharmacies with pagination.
     """
     return db.query(db_mod.Pharmacy).offset(paging.skip).limit(paging.limit)
 
 
-def get_pharmacies_open_at(
+def list_pharmacies_open_at(
         db: Session,
         query_time: time,
         day_of_week: DayOfWeek,
@@ -51,6 +49,33 @@ def get_pharmacies_open_at(
             db_mod.PharmacyHour.close_time >= query_time
         )
     ).offset(paging.skip).limit(paging.limit)
+
+
+def list_pharmacy_masks(
+        db: Session,
+        pharmacy_id: int,
+        sort_by: str,
+        paging: in_sch.PagingParams,
+):
+    """
+    List all masks sold by a given pharmacy, sorted by mask name or price.
+    """
+    query = (
+        db.query(
+            db_mod.PharmacyMask.id,
+            db_mod.Mask.name,
+            db_mod.PharmacyMask.price
+        )
+        .filter(db_mod.PharmacyMask.pharmacy_id == pharmacy_id)
+        .join(db_mod.Mask)
+    )
+
+    if sort_by == SortType.NAME:
+        query = query.order_by(db_mod.Mask.name)
+    elif sort_by == SortType.PRICE:
+        query = query.order_by(db_mod.PharmacyMask.price)
+
+    return query.offset(paging.skip).limit(paging.limit)
 
 
 def create_pharmacy(db: Session, pharmacy: db_mod.Pharmacy):

@@ -86,16 +86,16 @@ def setup_database():
 
         pharmacy_hours = [
             db_mod.PharmacyHour(pharmacy_id=pharmacy1.id,
-                                day_of_week=DayOfWeek.Mon,
+                                day_of_week=DayOfWeek.MON,
                                 open_time="08:00:00", close_time="18:00:00"),
             db_mod.PharmacyHour(pharmacy_id=pharmacy1.id,
-                                day_of_week=DayOfWeek.Tue,
+                                day_of_week=DayOfWeek.TUE,
                                 open_time="08:00:00", close_time="18:00:00"),
             db_mod.PharmacyHour(pharmacy_id=pharmacy2.id,
-                                day_of_week=DayOfWeek.Wed,
+                                day_of_week=DayOfWeek.WED,
                                 open_time="09:00:00", close_time="17:00:00"),
             db_mod.PharmacyHour(pharmacy_id=pharmacy2.id,
-                                day_of_week=DayOfWeek.Thur,
+                                day_of_week=DayOfWeek.THUR,
                                 open_time="09:00:00", close_time="17:00:00")
         ]
         db.add_all(pharmacy_hours)
