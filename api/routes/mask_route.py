@@ -4,12 +4,11 @@ mask_routes.py
 
 This module defines the API endpoints for managing masks.
 """
+from typing import List
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from api.database.database import get_db
-
-from typing import List
 
 from api.schemas import input_schema as in_sch, output_schema as out_sch
 from api.services import mask_service

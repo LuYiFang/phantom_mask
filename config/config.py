@@ -6,16 +6,19 @@ This module contains configuration settings for the application.
 """
 
 import os
+from pathlib import Path
+
 from dotenv import load_dotenv
 
 ENV = os.getenv("ENV", "development")
+root_path = Path(os.path.dirname(__file__)).parent
 
 if ENV == "development":
-    load_dotenv(dotenv_path=".env")
+    load_dotenv(dotenv_path=root_path / ".env")
 elif ENV == "testing":
-    load_dotenv(dotenv_path=".env.testing")
+    load_dotenv(dotenv_path=root_path / ".env.testing")
 elif ENV == "production":
-    load_dotenv(dotenv_path=".env.prod")
+    load_dotenv(dotenv_path=root_path / ".env.prod")
 else:
     raise ValueError(f"Unknown environment: {ENV}")
 
@@ -28,4 +31,5 @@ POSTGRES_TEST_DB = os.getenv("POSTGRES_TEST_DB")
 
 DATABASE_URL = (f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@"
                 f"{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}")
-
+TEST_DATABASE_URL = (f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@"
+                     f"{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_TEST_DB}")

@@ -4,9 +4,12 @@ pharmacy_service.py
 
 This module provides service layer functions for managing pharmacy operations.
 """
+from datetime import time
+
 from sqlalchemy.orm import Session
 from api.crud import pharmacy_crud
 import api.database.db_models as db_mod
+from api.enums import DayOfWeek
 from api.schemas import input_schema as in_sch
 
 
@@ -25,6 +28,18 @@ def get_pharmacies(
     Get a list of pharmacies with pagination.
     """
     return pharmacy_crud.get_pharmacies(db, paging)
+
+
+def get_pharmacies_open_at(
+        db: Session,
+        query_time: time,
+        day_of_week: DayOfWeek,
+        paging: in_sch.PagingParams,
+):
+    """
+    Retrieve pharmacies open at a specific time and day of the week.
+    """
+    return pharmacy_crud.get_pharmacies_open_at(db, query_time, day_of_week, paging)
 
 
 def add_new_pharmacy(

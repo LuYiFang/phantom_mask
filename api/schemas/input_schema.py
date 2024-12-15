@@ -7,7 +7,7 @@ data transformation
 required for the various API endpoints.
 """
 
-from datetime import datetime
+from datetime import datetime, time
 from fastapi import Query
 from pydantic import BaseModel, PositiveInt, Field, conint
 from api.schemas.base_schema import (PharmacyBase, MaskBase, TransactionBase,
@@ -24,6 +24,22 @@ class PurchaseRequest(BaseModel):
     pharmacy_id: int
 
 
+class TimeQuery(BaseModel):
+    """
+    Represents a single time query parameter.
+    """
+    query_time: time
+
+
+def get_time(
+        query_time: time = Query(..., example="14:30:00")
+) -> TimeQuery:
+    """
+    Dependency function to get a single time from query parameters.
+    """
+    return TimeQuery(query_time=query_time)
+
+
 class DateRange(BaseModel):
     """
     Represents a date range with start and end dates.
@@ -32,9 +48,10 @@ class DateRange(BaseModel):
     end_date: datetime
 
 
-def get_date_range(start_date: datetime = Query(..., example="2021-01-01"),
-                   end_date: datetime = Query(...,
-                                              example="2021-01-31")) -> DateRange:
+def get_date_range(
+        start_date: datetime = Query(..., example="2021-01-01"),
+        end_date: datetime = Query(..., example="2021-01-31")
+) -> DateRange:
     """
     Dependency function to get a date range from query parameters.
     """
