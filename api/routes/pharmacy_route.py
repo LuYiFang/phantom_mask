@@ -11,14 +11,14 @@ from fastapi import Depends, APIRouter
 from sqlalchemy.orm import Session
 
 from api.database.database import get_db
-from api.enums import DayOfWeek, SortType
+from api.enums import DayOfWeek, SortType, ComparisonType
 from api.schemas import input_schema as in_sch, output_schema as out_sch
 from api.services import pharmacy_service
 
 router = APIRouter(tags=['Pharmacies'])
 
 
-@router.get("/pharmacies/{pharmacy_id}", response_model=out_sch.Pharmacy)
+@router.get("/pharmacies/{pharmacy_id}", response_model=out_sch.PharmacyDetail)
 def read_pharmacy(pharmacy_id: int, db: Session = Depends(get_db)):
     """
     Retrieve a pharmacy by its ID.
@@ -62,6 +62,23 @@ def list_pharmacy_masks(
     """
     return pharmacy_service.list_pharmacy_masks(db, pharmacy_id,
                                                 sort_by, paging)
+
+
+@router.get("/pharmacies/filters/masks/count",
+            response_model=List[out_sch.PharmacyWithCount])
+def list_pharmacies_by_mask_count(
+    comparison: ComparisonType = ComparisonType.LESS,
+    count: int = 10,
+    price_range: in_sch.PriceRangeParams = Depends(),
+    paging: in_sch.PagingParams = Depends(),
+    db: Session = Depends(get_db)
+):
+    """
+    List all pharmacies with more or less than x mask products within a price range.
+    """
+    return pharmacy_service.list_pharmacies_by_mask_count(db, comparison,
+                                                          count, price_range,
+                                                          paging)
 
 
 @router.post("/pharmacies", response_model=out_sch.Pharmacy)

@@ -14,3 +14,8 @@ class DayOfWeek(str, Enum):
 class SortType(str, Enum):
     NAME = "name"
     PRICE = "price"
+
+
+class ComparisonType(str, Enum):
+    MORE = "more"
+    LESS = "less"

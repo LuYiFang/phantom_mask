@@ -39,6 +39,14 @@ class Pharmacy(OrmBase, PharmacyBase):
     id: int
 
 
+class PharmacyDetail(Pharmacy):
+    """
+    Model representing a pharmacy detail.
+    """
+    cash_balance: float
+    opening_hours: List[PharmacyHour] = []
+
+
 class PharmacyWithHours(Pharmacy):
     """
     Model representing a pharmacy with its hours.

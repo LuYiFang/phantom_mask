@@ -25,7 +25,6 @@ class PharmacyBase(BaseModel):
     Represents the base model for a pharmacy.
     """
     name: str
-    cash_balance: float
 
 
 class MaskBase(BaseModel):

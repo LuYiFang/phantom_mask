@@ -1,5 +1,5 @@
 import pytest
-from api.enums import DayOfWeek, SortType
+from api.enums import DayOfWeek, SortType, ComparisonType
 
 
 class TestPharmacyRoutes:
@@ -53,4 +53,50 @@ class TestPharmacyRoutes:
         assert len(data) == len(expected)
         for i, mask in enumerate(expected):
             for key, value in mask.items():
+                assert data[i][key] == value
+
+    @pytest.mark.parametrize(
+        "comparison, count, min_price, max_price, expected", [
+            (
+                    ComparisonType.MORE.value, 1, 30.00, 50.00,
+                    [
+                        {"id": 1, "name": "Pharmacy One", "mask_count": 2},
+                    ]
+            ),
+            (
+                    ComparisonType.LESS.value, 2, 50.00, 70.00,
+                    [
+                        {"id": 1, "name": "Pharmacy One", "mask_count": 1},
+                    ]
+            ),
+            (
+                    ComparisonType.MORE.value, 0, 30.00, 70.00,
+                    [
+                        {"id": 1, "name": "Pharmacy One", "mask_count": 2},
+                        {"id": 2, "name": "Pharmacy Two", "mask_count": 2}
+                    ]
+            ),
+            (
+                    ComparisonType.LESS.value, 1, 70.00, 100.00,
+                    []
+            )
+        ])
+    def test_list_pharmacies_by_mask_count(self, comparison, count,
+                                           min_price, max_price, expected):
+        params = {
+            "comparison": comparison,
+            "count": count,
+            "min_price": min_price,
+            "max_price": max_price,
+            "skip": 0,
+            "limit": 10
+        }
+        response = self.client.get("/pharmacies/filters/masks/count",
+                                   params=params)
+        assert response.status_code == 200
+        data = response.json()
+        assert isinstance(data, list)
+        assert len(data) == len(expected)
+        for i, pharmacy in enumerate(expected):
+            for key, value in pharmacy.items():
                 assert data[i][key] == value

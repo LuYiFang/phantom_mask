@@ -78,8 +78,8 @@ class PriceRangeParams(BaseModel):
     """
     Represents price range parameters.
     """
-    min_price: float = Field(..., gt=0)
-    max_price: float = Field(..., gt=0)
+    min_price: float = Field(..., ge=0)
+    max_price: float = Field(..., ge=0)
 
 
 class PharmacyCreate(PharmacyBase):
