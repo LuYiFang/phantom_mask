@@ -11,7 +11,7 @@ from sqlalchemy import func, and_
 from sqlalchemy.orm import Session
 
 import api.database.db_models as db_mod
-from api.enums import DayOfWeek, SortType, ComparisonType
+from api.enums import DayOfWeek, ComparisonType
 from api.schemas import input_schema as in_sch
 
 
@@ -49,33 +49,6 @@ def list_pharmacies_open_at(
             db_mod.PharmacyHour.close_time >= query_time
         )
     ).offset(paging.skip).limit(paging.limit)
-
-
-def list_pharmacy_masks(
-        db: Session,
-        pharmacy_id: int,
-        sort_by: SortType,
-        paging: in_sch.PagingParams,
-):
-    """
-    List all masks sold by a given pharmacy, sorted by mask name or price.
-    """
-    query = (
-        db.query(
-            db_mod.PharmacyMask.id,
-            db_mod.Mask.name,
-            db_mod.PharmacyMask.price
-        ).filter(
-            db_mod.PharmacyMask.pharmacy_id == pharmacy_id
-        ).join(db_mod.Mask)
-    )
-
-    if sort_by == SortType.NAME:
-        query = query.order_by(db_mod.Mask.name)
-    elif sort_by == SortType.PRICE:
-        query = query.order_by(db_mod.PharmacyMask.price)
-
-    return query.offset(paging.skip).limit(paging.limit)
 
 
 def list_pharmacies_by_mask_count(

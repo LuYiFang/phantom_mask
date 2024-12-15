@@ -9,13 +9,13 @@ from datetime import time
 from sqlalchemy.orm import Session
 from api.crud import pharmacy_crud
 import api.database.db_models as db_mod
-from api.enums import DayOfWeek, SortType, ComparisonType
+from api.enums import DayOfWeek, ComparisonType
 from api.schemas import input_schema as in_sch
 from api.utils.tools import exception_handler
 
 
 @exception_handler
-def read_pharmacy_details(db: Session, pharmacy_id: int):
+def get_pharmacy_details(db: Session, pharmacy_id: int):
     """
     Get detailed information for a specific pharmacy.
     """
@@ -48,19 +48,6 @@ def list_pharmacies_open_at(
 
 
 @exception_handler
-def list_pharmacy_masks(
-        db: Session,
-        pharmacy_id: int,
-        sort_by: SortType,
-        paging: in_sch.PagingParams,
-):
-    """
-    List all masks sold by a given pharmacy, sorted by mask name or price.
-    """
-    return pharmacy_crud.list_pharmacy_masks(db, pharmacy_id, sort_by, paging)
-
-
-@exception_handler
 def list_pharmacies_by_mask_count(
         db: Session,
         comparison: ComparisonType,
@@ -76,7 +63,7 @@ def list_pharmacies_by_mask_count(
 
 
 @exception_handler
-def add_new_pharmacy(
+def create_pharmacy(
         db: Session,
         pharmacy_data: in_sch.PharmacyCreate
 ):

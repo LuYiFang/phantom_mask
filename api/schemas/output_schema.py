@@ -108,7 +108,9 @@ class TransactionSummary(OrmBase, BaseModel):
     """
     Model summarizing transactions.
     """
-    total_amount: conint(ge=0) = Field(default=0)
+    mask_id: int
+    mask_name: str
+    mask_count: int
     total_value: float
 
 
